@@ -1,10 +1,10 @@
 # Toggle Switch
 
-This recipe will match Clay CSS Toggle Switch to [Material Design's Selection Control Switches](https://material.io/components/selection-controls). We won't be able to reliably create a ripple effect here without JavaScript to normalize the `focus` and `active` states on `input[type="checkbox"]` between browsers (e.g., Firefox and Safari don't apply the `:focus` pseudo class on click).
+This recipe will match Clay CSS Toggle Switch to [Material Design's Selection Control Switches](https://material.io/components/selection-controls). We will not be able to reliably create a ripple effect here without JavaScript to normalize the `focus` and `active` states on `input[type="checkbox"]` between browsers (e.g., Firefox and Safari do not apply the `:focus` pseudo class on click).
 
 ## Toggle Switch Size
 
-Material Design Switch Thumb is 20px x 20px, Track is 32px x 14px, and have rounded borders.
+Material Design Switch Thumb is `20px` x `20px`, Track is `32px` x `14px`, and have rounded borders.
 
 Material Design:
 
@@ -55,11 +55,11 @@ Material Design:
 }
 ```
 
-We can start by setting the size of our Thumb (`.toggle-switch-check:empty ~ .toggle-switch-bar:after`). The variable `$toggle-switch-button-width` sets the thumb `height` and `width`. The variable `$toggle-switch-button-width-mobile` sets the mobile (`max-width: 767px`) thumb `height` and `width`. We will set the `$toggle-switch-button-width` to 20px. The variable `$toggle-switch-button-width-mobile` inherits the `$toggle-switch-button-width` value so we don't need to set it.
+We can start by setting the size of our Thumb (`.toggle-switch-check:empty ~ .toggle-switch-bar:after`). The variable `$toggle-switch-button-width` sets the thumb `height` and `width`. The variable `$toggle-switch-button-width-mobile` sets the mobile (`max-width: 767px`) thumb `height` and `width`. We will set the `$toggle-switch-button-width` to `20px`. The variable `$toggle-switch-button-width-mobile` inherits the `$toggle-switch-button-width` value so we do not need to set it.
 
-The Track (`.toggle-switch-check:empty ~ .toggle-switch-bar:before`) is automatically sized to match the Thumb. We can make the track taller or shorter relative to the Thumb Height with `$toggle-switch-bar-padding: -3px;`. This takes 3px off the top, right, bottom, and left for a total of 6px horizontally and vertically.
+The Track (`.toggle-switch-check:empty ~ .toggle-switch-bar:before`) is automatically sized to match the Thumb. We can make the track taller or shorter relative to the Thumb Height with `$toggle-switch-bar-padding: -3px;`. This takes `3px` off the top, right, bottom, and left for a total of `6px` horizontally and vertically.
 
-One thing to note, the value units must be `px` because of a bug in Clay CSS that doesn't allow any other types of units.
+One thing to note, the value units must be `px` because of a bug in Clay CSS that does not allow any other types of units.
 
 We can also set the transitions we will use to animate the colors and Thumb.
 

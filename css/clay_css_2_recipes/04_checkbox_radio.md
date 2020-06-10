@@ -1,8 +1,12 @@
 # Checkbox and Radio
 
-This recipe will match Clay CSS Checkbox and Radio (Custom Controls) to Material Design's Selection Controls shown in [https://material.io/components/selection-controls/](https://material.io/components/selection-controls/). These components are different from browser default checkboxes and radios. The changes made here won't apply to all checkboxes and radios in DXP due to legacy code that hasn't been updated yet. An example that comes to mind are the checkboxes inside Search Containers.
+This recipe will match Clay CSS Checkbox and Radio (Custom Controls) to Material Design's Selection Controls shown in [https://material.io/components/selection-controls/](https://material.io/components/selection-controls/).
 
-Clay CSS Checkbox and Radio variables are limited in what you can do, but with a bit of hacking and slashing we can get pretty close with the markup that is already there. We will start with modifying mostly variables that are available.
+These components are different from browser default checkboxes and radios. The changes made here will not apply to all checkboxes and radios in DXP due to legacy code that has not yet been updated (e.g., checkboxes in DXP's Search Containers).
+
+Clay CSS Checkbox and Radio variables are limited in what you can do, but with a bit of hacking and slashing we can get pretty close with the markup that is already there.
+
+We will start with modifying mostly variables that are available.
 
 ## Custom Control
 
@@ -14,44 +18,46 @@ Material Design:
 
 ```css
 .mdc-checkbox .mdc-checkbox__native-control:enabled:not(:checked):not(:indeterminate)~.mdc-checkbox__background {
-    border-color: #757575;
-    background-color: transparent
+	border-color: #757575;
+	background-color: transparent
 }
 
 .mdc-checkbox .mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__background,
 .mdc-checkbox .mdc-checkbox__native-control:enabled:indeterminate~.mdc-checkbox__background {
-    border-color: #6200ee;
-    background-color: #6200ee
+	border-color: #6200ee;
+	background-color: #6200ee
 }
 
 .mdc-radio .mdc-radio__native-control:enabled:not(:checked)+.mdc-radio__background .mdc-radio__outer-circle {
-    border-color: #757575
+	border-color: #757575
 }
 
 .mdc-radio .mdc-radio__native-control:enabled:checked+.mdc-radio__background .mdc-radio__outer-circle {
-    border-color: #6200ee
+	border-color: #6200ee
 }
 
 .mdc-radio {
-    width: 20px;
-    height: 20px;
-    will-change: opacity, transform, border-color, color
+	width: 20px;
+	height: 20px;
+	will-change: opacity, transform, border-color, color
 }
 
 .mdc-form-field {
-    color: rgba(0, 0, 0, .87);
-    font-size: .875rem;
-    font-weight: 400;
-    height: 56px
-    letter-spacing: .0178571429em;
-    line-height: 1.25rem;
-    width: 100%;
+	color: rgba(0, 0, 0, .87);
+	font-size: .875rem;
+	font-weight: 400;
+	height: 56px
+	letter-spacing: .0178571429em;
+	line-height: 1.25rem;
+	width: 100%;
 }
 ```
 
-We won't match the height on our container `.custom-control` and use the calculated default `min-height`. Setting the `height` to 56px will cause alignment issues in components that use checkboxes and will require us to reset a lot of CSS in those components. We will use `margin-bottom` instead to get the correct spacing between custom-controls.
+We will not match the height on our container `.custom-control` and use the calculated default `min-height`.
 
-We missed setting the `$input-label-color` in the Text Input Recipe due to Material Design using floating labels. We can match this now. The default state for checkbox and radio are the same. Checkbox size is slightly different (18px x 18px) and radios (20px x 20px). We will set the shared size to be 18px and overwrite later.
+Setting the `height` to `56px` will cause alignment issues in components that use checkboxes and will require us to reset a lot of CSS in those components. We will use `margin-bottom` instead to get the correct spacing between custom-controls.
+
+We missed setting the `$input-label-color` in the Text Input Recipe due to Material Design using floating labels. We can match this now. The default state for checkbox and radio are the same. Checkbox size is slightly different (`18px` x `18px`) and radios (`20px` x `20px`). We will set the shared size to be `18px` and overwrite later.
 
 _/src/css/\_clay_variables.scss_
 
@@ -75,7 +81,9 @@ $custom-control-indicator-size: 1.125rem;
 
 ### Custom Control Unchecked Focus
 
-Clay CSS `custom-control` have no `hover` styles and thus have no variables associated with it. We will tackle the `hover` styles later. Material Design focus styles for the unchecked checkbox and radio are the same as the default state. The styles are below:
+Clay CSS `custom-control` have no `hover` styles and thus have no variables associated with it. We will tackle the `hover` styles later.
+
+Material Design focus styles for the unchecked checkbox and radio are the same as the default state. The styles are below:
 
 ```css
 .mdc-checkbox
@@ -224,7 +232,9 @@ $custom-checkbox-indicator-border-radius: 0.125rem;
 
 ### Custom Checkbox Checked
 
-The default check icon provided by Clay Base doesn't match the one in Material Design. Material Design inlines the SVG in the markup. Clay CSS uses an SVG data uri with `background-image` to render the icon. We can grab an icon that looks similar to Material Design's icon and use Clay CSS' [clay-svg-url](https://github.com/liferay/clay/blob/0568f0a1ffb82b0bc85321b10cb32ff5f68e2cc1/packages/clay-css/src/scss/functions/_global-functions.scss#L148-L173) function. This function accepts an SVG as a parameter and returns a data uri we can pass into `background-image`. We must make sure to wrap the SVG in single quotes if the attributes are delimited by double quotes.
+The default check icon provided by Clay Base does not match the one in Material Design. Material Design uses inline SVG's in the markup. Clay CSS uses a SVG data uri with `background-image` to render the icon.
+
+We can grab an icon that looks similar to Material Design's icon and use Clay CSS' [clay-svg-url](https://github.com/liferay/clay/blob/0568f0a1ffb82b0bc85321b10cb32ff5f68e2cc1/packages/clay-css/src/scss/functions/_global-functions.scss#L148-L173) function. This function accepts an SVG as a parameter and returns a data uri we can pass into `background-image`. We must make sure to wrap the SVG in single quotes if the attributes are delimited by double quotes.
 
 We will also set `background-size` to make it larger. We set both `width` and `height` values on `background-size` because we will be using `transition` to animate the checkbox on check at the end.
 
@@ -239,7 +249,9 @@ $custom-checkbox-indicator-icon-checked-bg-size: 0.875rem 0.875rem;
 
 ### Custom Checkbox Indeterminate
 
-The indeterminate visual state can only be set with JavaScript. There are a few places in DXP that apply this visual state. Most noteably, in the Management Bar with a Search Container when a subset of items are checked. The icon provided is close enough for this case, but can be changed through the `$custom-checkbox-indicator-icon-indeterminate` variable, in the same way, as we did with the check icon. We only need to change the `background-color` and `background-size` of the icon to match.
+The indeterminate visual state can only be set with JavaScript. There are a few places in DXP that apply this visual state; most noteably, in the Management Bar with a Search Container when a subset of items are checked.
+
+The icon provided is close enough for this case, but can be changed through the `$custom-checkbox-indicator-icon-indeterminate` variable, in much the same way as we did with the check icon. We only need to change the `background-color` and `background-size` of the icon to match.
 
 Material Design:
 
@@ -266,7 +278,7 @@ $custom-checkbox-indicator-icon-indeterminate-bg-size: 0.625rem 0.625rem;
 
 ### Custom Radio Unchecked
 
-As mentioned earlier, Material Design radio elements are 20px x 20px. Clay CSS doesn't provide modifying sizes individually. We will have to update `_clay_custom.scss`.
+As mentioned earlier, Material Design radio elements are `20px` x `20px`. Clay CSS does not provide modifying sizes individually. We will have to update `_clay_custom.scss`.
 
 _/src/css/\_clay_variables.scss_
 
@@ -290,7 +302,7 @@ _/src/css/\_clay_variables.scss_
 
 ### Custom Radio Checked
 
-We've covered most of the styles in the Custom Control section. We only need to change the `background-size`, `color` of the radio button circle icon and change the `background-color` of the `input` to `transparent`.
+We have covered most of the styles in the Custom Control section. We only need to change the `background-size`, `color` of the radio button circle icon and change the `background-color` of the `input` to `transparent`.
 
 There is no variable to change the `background-color` of a Custom Radio input. We will need to overwrite this in `_clay_custom.scss`.
 
@@ -379,7 +391,9 @@ _/src/css/\_clay_custom.scss_
 
 ## Custom Control Hover
 
-Now that we've configured everything we could through variables, it's time to start writing our `_clay_custom.scss` overwrites. We will start with the `hover` state. Material Design has a 40px x 40px overlay on `hover`. Clay CSS doesn't provide a place for this, but we can repurpose the `.custom-control-label::after` pseudo element for this. We need to move the icons from `.custom-control-label::after` to `.custom-control-label::before`.
+Now that we have configured everything we could through variables, it is time to start writing our `_clay_custom.scss` overwrites. We will start with the `hover` state.
+
+Material Design has a `40px` x `40px` overlay on `hover`. Clay CSS does not provide a place for this, but we can repurpose the `.custom-control-label::after` pseudo element for this. We need to move the icons from `.custom-control-label::after` to `.custom-control-label::before`.
 
 _/src/css/\_clay_custom.scss_
 
@@ -442,7 +456,9 @@ _/src/css/\_clay_custom.scss_
 }
 ```
 
-The `::after` pseudo element is now free and clear of any icons. Material Design has a 40px x 40px clickable area for checkboxes and radios. We can apply that and the `hover` style here. The selectors used for the `hover` style might seem like overkill here, but we are preparing for overwriting Bootstrap's `focus` and `active` states.
+The `::after` pseudo element is now free and clear of any icons. Material Design has a `40px` x `40px` clickable area for checkboxes and radios. We can apply that and the `hover` style here.
+
+The selectors used for the `hover` style might seem like overkill, but we are preparing for overwriting Bootstrap's `focus` and `active` states.
 
 Material Design:
 
@@ -500,7 +516,11 @@ _/src/css/\_clay_custom.scss_
 
 ## Custom Control Focus
 
-We will add the ripple effect using CSS `animation`, `background-color`, `background-image`, and `background-size`. The animation is a bit jarring when using the keyboard to navigate through the inputs, unfortunately I'm unable to figure out a way to make it all work together strictly with CSS. If you know a nice hack, send a PR!
+We will add the ripple effect using CSS `animation`, `background-color`, `background-image`, and `background-size`.
+
+The animation is a bit jarring when using the keyboard to navigate through the inputs, unfortunately I am unable to figure out a way to make it all work together strictly with CSS.
+
+P.S. If you know a nice hack, please send a pull request!
 
 _/src/css/\_clay_custom.scss_
 
@@ -553,7 +573,9 @@ _/src/css/\_clay_custom.scss_
 
 ## Custom Control Active
 
-In the previous example, we used `animation` to replicate the ripple effect. We have a problem where the animation doesn't replay on subsequent clicks. One time CSS `animation`s don't replay once it has completed, we will have to force it to replay by resetting it in the active state.
+In the previous example, we used `animation` to replicate the ripple effect. We have a problem where the animation does not replay on subsequent clicks.
+
+One time CSS `animation`s do not replay once it has completed, we will have to force it to replay by resetting it in the active state.
 
 ```scss
 .custom-control.custom-checkbox,

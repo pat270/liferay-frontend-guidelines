@@ -1,8 +1,8 @@
 # Text Input
 
-This recipe will modify the input class, `.form-control`, in Clay CSS to match Material Design's Filled Text Field shown in [https://material.io/components/text-fields/](https://material.io/components/text-fields/). The Material Design site uses several HTML elements with JavaScript to create the style. We will try to duplicate it using only the `input` element.
+This recipe will modify the input class, `.form-control`, in Clay CSS to match Material Design's Filled Text Field shown at [https://material.io/components/text-fields/](https://material.io/components/text-fields/). The Material Design site uses several HTML elements with JavaScript to create the style. We will try to duplicate it using only the `input` element.
 
-We won't be able to duplicate floating input labels reliably without changing the markup so it won't be covered here.
+We will not be able to duplicate floating input labels reliably without changing the markup so it will not be covered here.
 
 A list of references for this recipe:
 
@@ -58,7 +58,9 @@ The simplified Material Design styles for the default state are listed below:
 
 We have the styles we need to update the default state of `form-control` in Clay CSS. HTML inputs are generally vertically centered by default with the exception of `textarea`, `select[multiple]`, and `select[size]`. Setting the height should cover most use cases and `$input-padding-y` should not need to be updated.
 
-In this case, Material Design sets a large value for `padding-top` to make space for floating labels. We will skip this for now. Setting `$input-padding-y` to 20px will cut off text on our `select` input we will update case by case as necessary.
+In this case, Material Design sets a large value for `padding-top` to make space for floating labels. We will skip this for now.
+
+Setting `$input-padding-y` to `20px` will cut off text on our `select` input, so we will need to update it on a case by case as necessary.
 
 _/src/css/\_clay_variables.scss_
 
@@ -77,9 +79,9 @@ $input-color: rgba($black, 0.87);
 $input-padding-x: 1rem;
 ```
 
-Clay CSS doesn't have a variable to modify `letter-spacing` in `form-control`. We will need to update `_clay_custom.scss`. We can go a step further and add a `$input-letter-spacing` variable.
+Clay CSS does not have a variable to modify `letter-spacing` in `form-control`. We will need to update `_clay_custom.scss`. We can go a step further and add a `$input-letter-spacing` variable.
 
-We don't need to worry about namespacing the variable here because it follows the Bootstrap and Clay CSS naming pattern. If this is added in the future, this is exactly what it will do.
+We do not need to worry about namespacing the variable here because it follows the Bootstrap and Clay CSS naming pattern. If this is added in the future, this is exactly what it will do.
 
 _/src/css/\_clay_variables.scss_
 
@@ -95,7 +97,9 @@ _/src/css/\_clay_custom.scss_
 }
 ```
 
-Material Design applies several transitions when state changes on the input. We can set them using the `$input-transition` variable. We will use background CSS properties to apply the ripple effect later.
+Material Design applies several transitions when state changes on the input. We can set them using the `$input-transition` variable.
+
+We will use `background` CSS properties to apply the ripple effect later.
 
 ```scss
 $input-transition: background-color 15ms linear, background-position 180ms
@@ -122,7 +126,9 @@ Material Design's input hover styles are below:
 }
 ```
 
-Clay CSS doesn't provide any variables for setting the hover state. We can leverage the mixin [clay-form-control-variant](https://github.com/liferay/clay/blob/0568f0a1ffb82b0bc85321b10cb32ff5f68e2cc1/packages/clay-css/src/scss/mixins/_forms.scss#L83) to declare our styles. This will make it easier to redeclare focus and disabled states because the hover styles will win due to specificity. We can name the variable `$input`.
+Clay CSS does not provide any variables for setting the hover state. We can leverage the Sass mixin [clay-form-control-variant](https://github.com/liferay/clay/blob/0568f0a1ffb82b0bc85321b10cb32ff5f68e2cc1/packages/clay-css/src/scss/mixins/_forms.scss#L83) to declare our styles. This will make it easier to redeclare focus and disabled states because the hover styles will win due to specificity.
+
+We can name the variable `$input`.
 
 _/src/css/\_clay_variables.scss_
 
@@ -160,9 +166,9 @@ Material Design's input focus styles are below:
 }
 ```
 
-Since we added the selector `.form-control:hover` in the previous example, we will need to redeclare `background-color` and `border-color` for focus and disabled styles. We will also add our ripple effect using background properties. We don't need to redeclare `focus-box-shadow` because we didn't overwrite the `box-shadow` property in our hover state.
+Since we added the selector `.form-control:hover` in the previous example, we will need to redeclare `background-color` and `border-color` for focus and disabled styles. We will also add our ripple effect using background properties. We do not need to redeclare `focus-box-shadow` because we did not overwrite the `box-shadow` property in our hover state.
 
-Unfortunately, `clay-form-control-variant` doesn't have the option of passing in `focus-bg-size`. We will write that one manually.
+Unfortunately, `clay-form-control-variant` does not have the option of passing in `focus-bg-size`; we will have to do this manually.
 
 _/src/css/\_clay_variables.scss_
 
@@ -218,7 +224,7 @@ Material Design's input disabled styles are below:
 }
 ```
 
-Our `.form-control:hover` styles will overwrite these when hovering over disabled inputs. We will need to output these in `_clay_custom.scss` via the `clay-form-control-variant` mixin.
+Our `.form-control:hover` styles will overwrite these when hovering over disabled inputs. We will need to output these in `_clay_custom.scss` via the `clay-form-control-variant` Sass mixin.
 
 _/src/css/\_clay_variables.scss_
 
@@ -263,7 +269,9 @@ The Material Design site has no readonly styles, but there is some documentation
 
 > Read-only text fields display pre-filled text that the user cannot edit. A read-only text field is styled the same as a regular text field and is clearly labeled as read-only.
 
-Clay CSS updated `.form-control[readonly]` to use the `clay-form-control-variant` mixin in 2.18.2. In 2.18.1, we only have the variables below available:
+Clay CSS updated `.form-control[readonly]` to use the `clay-form-control-variant` Sass mixin in **2.18.2**.
+
+In **2.18.1**, we only have the variables below available:
 
 ```scss
 $input-readonly-bg: null !default;
@@ -303,7 +311,7 @@ _/src/css/\_clay_custom.scss_
 
 ### Form Control Sm
 
-Material Design has dense text fields that should be 40dp tall. We will just use 40px here.
+Material Design has dense text fields that should be `40dp` tall. We will just use `40px` here.
 
 ```scss
 $input-border-radius-sm: 0.25rem 0.25rem 0 0;
@@ -313,7 +321,7 @@ $input-padding-x-sm: 1rem;
 
 ### Form Control Lg
 
-There is no large text field equivalent, let's use 80px.
+There is no large text field equivalent, so we will use `80px`.
 
 ```scss
 $input-border-radius-lg: 0.25rem 0.25rem 0 0;
@@ -323,11 +331,15 @@ $input-padding-x-lg: 1.25rem;
 
 ## Select
 
-We can copy text field with trailing icon here. The first thing we should do is change the icon to match. Clay CSS comes with several Sass functions that help with converting an SVG to a `background-image`. One function is [clay-icon](https://github.com/liferay/clay/blob/0568f0a1ffb82b0bc85321b10cb32ff5f68e2cc1/packages/clay-css/src/scss/functions/_global-functions.scss#L179). It takes a Lexicon Icon name and color as parameters, then it returns a data uri to be used in `background-image`.
+We can copy the text field with trailing icon here.
+
+The first thing we should do is change the icon to match. Clay CSS comes with several Sass functions that help with converting an SVG to a `background-image`. One function is [clay-icon](https://github.com/liferay/clay/blob/0568f0a1ffb82b0bc85321b10cb32ff5f68e2cc1/packages/clay-css/src/scss/functions/_global-functions.scss#L179). It takes a Lexicon Icon name and color as parameters, then it returns a data uri to be used in `background-image`.
 
 The `_global-functions.scss` partial is imported right after `_clay_variables.scss` in DXP. We will have to import it at the top of `_clay_variables.scss` to have access to them.
 
-One thing to note about the select is there is no ripple effect on focus, we will have to get it to apply with multiple background-images. There is also no variable in `$input-select-*` that corresponds to background-size. We will have to copy the selector and overwrite in `_clay_custom.scss`.
+One thing to note about the select is that there is no ripple effect on focus.  We will have to get it that effect to apply with multiple `background-images`.
+
+There is also no variable in `$input-select-*` that corresponds to `background-size`. We will have to copy the selector and overwrite in `_clay_custom.scss`.
 
 _/src/css/\_clay_variables.scss_
 
@@ -362,9 +374,11 @@ select.form-control:not([multiple]):not([size]),
 
 ## Input Outline
 
-Clay CSS only has one style of text input. To create Material Design's Outline Input in [https://material.io/components/text-fields/](https://material.io/components/text-fields/), we will need to create a modifier we can add to `.form-control`. The other option is to create a totally separate component like `.mdc-outline-input` without relying the `form-control` class.
+Clay CSS only has one style of text input.
 
-We will go the modifier route since it might be easier to apply if you are using DXP taglibs or Clay Components.
+To create Material Design's Outline Input in [https://material.io/components/text-fields/](https://material.io/components/text-fields/), we will need to create a modifier we can add to `.form-control`. The other option is to create a separate component like `.mdc-outline-input` without relying on the `form-control` CSS class.
+
+We will use the modifier since it will be easier to apply if you are using DXP taglibs or Clay Components.
 
 Material Design's Outline Input default styles simplified:
 
@@ -408,7 +422,9 @@ Material Design's Outline Input default styles simplified:
 }
 ```
 
-We will create a class `.mdc-form-control-outline` that will be used with `.form-control` to create our outline variant. The markup should look like `<input class="form-control mdc-form-control-outline" type="text" />`. We can use the mixin [clay-form-control-variant](https://github.com/liferay/clay/blob/2.x/packages/clay-css/src/scss/mixins/_forms.scss#L83) to create our component.
+We will create a CSS class, `.mdc-form-control-outline`, that will be used with `.form-control` to create our outline variant.
+
+The markup should look like `<input class="form-control mdc-form-control-outline" type="text" />`. We can use the Sass mixin [clay-form-control-variant](https://github.com/liferay/clay/blob/2.x/packages/clay-css/src/scss/mixins/_forms.scss#L83) to create our component.
 
 We are namespacing the class with `mdc-` just to be safe. In the future, Bootstrap or the Clay Team may implement something with the name `form-control-outline` which might cause conflicts.
 
