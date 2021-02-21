@@ -13,8 +13,8 @@ const statAsync = promisify(fs.stat);
 const FILTER_PATTERN = /\.md$/;
 
 /**
- * Need not-robot-like headers to prevent Cloudflare from rejecting our
- * external link checks with 403s.
+ * Use not-robot-like headers to attempt to prevent Cloudflare from
+ * rejecting our external link checks with 403 or 503 status.
  *
  * See: https://github.com/liferay/liferay-frontend-guidelines/issues/133
  */
@@ -28,7 +28,19 @@ const HEADERS = {
 		'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:74.0) Gecko/20100101 Firefox/74.0'
 };
 
-const IGNORE_PATTERN = /^(?:.git|node_modules)$/;
+const IGNORE_DIR = /^(?:.git|node_modules)$/;
+
+const IGNORE_HOSTS = new Set([
+	// localhost and variants:
+	'0.0.0.0',
+	'127.0.0.1',
+	'::1',
+	'localhost',
+
+	// As of https://github.com/liferay/liferay-frontend-guidelines/pull/161
+	// Cloudflare is 503-ing all "bot-like" codepen.io requests.
+	'codepen.io'
+]);
 
 // Adapted from: https://stackoverflow.com/a/163684/2103996
 const URL_PATTERN = /\bhttps?:\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]/;
@@ -49,11 +61,27 @@ async function checkInternal(link, files) {
 	for (const file of files) {
 		const contents = await readFileAsync(file, 'utf8');
 
-		const headingPattern = link.slice(1).replace(/-/g, '[ -,]+');
+		const targets = new Set();
 
-		const regExp = new RegExp(`^#+\\s+${headingPattern}\\s*$`, 'im');
+		contents.replace(/^#+\s+(.+?)\s*$/gm, (match, heading) => {
+			// To make a target anchor, GitHub:
+			// - Extracts link text from Markdown links.
+			// - Turns spaces, hyphens, commas into hyphens.
+			// - Removes backticks, colons.
+			const target = heading
+				.replace(/^\[([^\\]+)\].*$/, (_match, text) => {
+					return text;
+				})
+				.replace(/[ -,]+/g, '-')
+				.replace(/[`:]/g, '');
 
-		if (!contents.match(regExp)) {
+			// Lowercase because the browser matches case-insensitively.
+			targets.add(target.toLowerCase());
+
+			return match;
+		});
+
+		if (!targets.has(link.slice(1).toLowerCase())) {
 			report(file, `No heading found matching internal target: ${link}`);
 		}
 	}
@@ -80,21 +108,17 @@ async function checkLocal(link, files) {
 }
 
 function checkRemote(link, files) {
-	return new Promise(resolve => {
-		const bail = problem => {
+	return new Promise((resolve) => {
+		const bail = (problem) => {
 			report(files, problem);
 			resolve();
 		};
 
-		const {hostname, pathname, port} = new URL(link);
+		const {hostname, pathname, port, search} = new URL(link);
 
-		if (
-			hostname === 'localhost' ||
-			hostname === '127.0.0.1' ||
-			hostname === '0.0.0.0' ||
-			hostname === '::1'
-		) {
+		if (IGNORE_HOSTS.has(hostname)) {
 			resolve();
+
 			return;
 		}
 
@@ -102,7 +126,7 @@ function checkRemote(link, files) {
 			{
 				headers: HEADERS,
 				host: hostname,
-				path: pathname,
+				path: `${pathname}${search}`,
 				port
 			},
 			({statusCode}) => {
@@ -114,7 +138,7 @@ function checkRemote(link, files) {
 			}
 		);
 
-		request.on('error', error => {
+		request.on('error', (error) => {
 			// Trim stack trace.
 			const text = error.toString().split(/\n/)[0];
 
@@ -128,7 +152,7 @@ async function enqueueFile(file, pending) {
 
 	const links = extractLinks(contents, file);
 
-	links.forEach(link => {
+	links.forEach((link) => {
 		if (!pending.has(link)) {
 			pending.set(link, new Set());
 		}
@@ -152,37 +176,50 @@ function extractLinks(contents, file) {
 			(_, reference, target) => {
 				definitions.add(reference);
 				links.add(target);
+
 				return ' ';
 			}
 		)
 		// [link text](https://example.com a title)
 		.replace(/\[[^\]\n]+\]\(([^\s)]+) [^)\n]+\)/g, (_, link) => {
 			links.add(link);
+
+			return ' ';
+		})
+		// [link text](<https://example.com>)
+		.replace(/\[[^\]\n]+\]\(<([^\s>]+)>\)/g, (_, link) => {
+			links.add(link);
+
 			return ' ';
 		})
 		// [link text](https://example.com)
 		.replace(/\[[^\]\n]+\]\(([^\s)]+)\)/g, (_, link) => {
 			links.add(link);
+
 			return ' ';
 		})
 		// [link text][reference]
 		.replace(/\[[^\]\n]+\]\[([^\]\n]+)\]/g, (_, reference) => {
 			references.add(reference);
+
 			return ' ';
 		})
 		// [link text]
 		.replace(/\[([^\]\n]+)\]g/, (_, reference) => {
 			references.add(reference);
+
 			return ' ';
 		})
 		// <http://www.example.com>
 		.replace(new RegExp(`<(${URL_PATTERN.source})>`, 'gi'), (_, url) => {
 			links.add(url);
+
 			return ' ';
 		})
 		// http://www.example.com
-		.replace(URL_PATTERN, url => {
+		.replace(URL_PATTERN, (url) => {
 			links.add(url);
+
 			return ' ';
 		});
 
@@ -236,7 +273,7 @@ async function run(pending) {
 function report(bad, message) {
 	const files = typeof bad === 'string' ? [bad] : [...bad];
 
-	files.forEach(file => {
+	files.forEach((file) => {
 		errorCount++;
 		console.error(`${file}: ${message}`);
 	});
@@ -248,7 +285,7 @@ async function* walk(directory) {
 	for (let i = 0; i < entries.length; i++) {
 		const entry = path.join(directory, entries[i]);
 
-		if (IGNORE_PATTERN.test(entry)) {
+		if (IGNORE_DIR.test(entry)) {
 			continue;
 		}
 
@@ -265,7 +302,7 @@ async function* walk(directory) {
 }
 
 main()
-	.catch(error => {
+	.catch((error) => {
 		errorCount++;
 		console.error(error);
 	})
